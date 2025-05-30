@@ -50,7 +50,7 @@ def train_model():
 
     print("[train.py] Построение модели...")
     vocab_size = len(encoder.tokenizer.word_index) + 1
-    model = build_model(vocab_size=vocab_size, max_length=max_length)
+    model = build_model(vocab_size=vocab_size)
 
     print("[train.py] Компиляция и обучение...")
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
