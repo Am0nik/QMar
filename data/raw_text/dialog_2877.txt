@@ -1,0 +1,1 @@
+<user> Йо!<assistant> Привет! Как сам?<eos>

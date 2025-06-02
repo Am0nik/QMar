@@ -1,0 +1,1 @@
+<user> Йо!<assistant> Что на уме?<eos>

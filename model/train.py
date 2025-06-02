@@ -1,3 +1,5 @@
+# train.py
+
 import os
 import json
 import numpy as np
@@ -7,16 +9,16 @@ from sklearn.model_selection import train_test_split
 from utils.loader import load_jsonl_texts, load_txt_pairs
 import tensorflow as tf
 
+# Пути
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VOCAB_PATH = os.path.join(BASE_DIR, 'data', 'processed', 'vocab.json')
 CHECKPOINT_PATH = os.path.join(BASE_DIR, 'checkpoints', 'model.keras')
 TXT_PATH = os.path.join(BASE_DIR, 'data', 'raw_text')
 JSONL_DIR = os.path.join(BASE_DIR, 'data', 'corpora_jsonl')
 
-
-
-num_epochs = 20
-max_length = 100
+# Параметры
+num_epochs = 15
+max_length = 100  # Должен совпадать с generate.py
 
 def train_model():
     print("[train.py] Загрузка .txt и .jsonl файлов...")
@@ -26,11 +28,17 @@ def train_model():
     
     texts = jsonl_texts + txt_texts
     print(f"[train.py] Загружено текстов: {len(texts)}")
-    print(f"[train.py] Пример текста: {texts[0]}")
+    if texts:
+        print(f"[train.py] Пример текста: {texts[0]}")
 
     encoder = TextEncoder()
     print("[train.py] Фитинг токенизатора...")
     encoder.fit(texts)
+
+    # Проверим наличие специальных токенов
+    for token in ['<user>', '<assistant>', '<eos>']:
+        idx = encoder.tokenizer.word_index.get(token)
+        print(f"[train.py] Токен '{token}' — индекс в словаре: {idx}")
 
     print("[train.py] Подготовка обучающих последовательностей...")
     X, y = [], []
@@ -46,15 +54,21 @@ def train_model():
     print(f"[train.py] Размерность X: {X.shape}, y: {y.shape}")
 
     print("[train.py] Разделение на train и val...")
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True)
 
     print("[train.py] Построение модели...")
     vocab_size = len(encoder.tokenizer.word_index) + 1
     model = build_model(vocab_size=vocab_size)
 
     print("[train.py] Компиляция и обучение...")
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
-    model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=num_epochs)
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    model.fit(X_train, y_train,
+              validation_data=(X_val, y_val),
+              epochs=num_epochs,
+              verbose=1)
 
     os.makedirs(os.path.dirname(CHECKPOINT_PATH), exist_ok=True)
     model.save(CHECKPOINT_PATH)

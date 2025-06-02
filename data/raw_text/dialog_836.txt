@@ -1,0 +1,1 @@
+<user>Хорошо. А где лучше учиться?<assistant>Можешь попробовать: - Coursera (Andrew Ng, Stanford ML) - Книга «Введение в машинное обучение с Python» (Sebastian Raschka) - Kaggle — отличное место для практики

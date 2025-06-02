@@ -1,0 +1,1 @@
+<user> Пока!<assistant> До встречи!<eos>
